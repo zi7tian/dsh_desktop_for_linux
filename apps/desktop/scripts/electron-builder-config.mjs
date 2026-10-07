@@ -249,12 +249,12 @@ export function createElectronBuilderConfig(
     },
     deb: {
       packageName: 'deepseek-harness',
-      depends: ['libc6 (>= 2.32)', 'libgtk-3-0', 'libnotify4', 'libnss3', 'libxss1', 'libxtst6', 'xdg-utils',
+      depends: ['libc6 (>= 2.32)', 'libgtk-3-0', 'libnotify4', 'libnss3', 'libxss1', 'libxtst6', 'xdg-utils', 'xdg-user-dirs',
         'libatspi2.0-0', 'libuuid1', 'libsecret-1-0', 'libasound2', 'libgbm1', 'libdrm2'],
     },
     rpm: {
       packageName: 'deepseek-harness',
-      depends: ['glibc >= 2.32', 'gtk3', 'libnotify', 'nss', 'libXScrnSaver', 'libXtst', 'xdg-utils',
+      depends: ['glibc >= 2.32', 'gtk3', 'libnotify', 'nss', 'libXScrnSaver', 'libXtst', 'xdg-utils', 'xdg-user-dirs',
         'at-spi2-core', 'libuuid', 'libsecret', 'alsa-lib', 'mesa-libgbm', 'libdrm'],
     },
     pacman: {
@@ -262,7 +262,7 @@ export function createElectronBuilderConfig(
       artifactName: 'deepseek-harness-${version}-linux-x86_64.pkg.tar.zst',
       compression: 'zstd',
       depends: ['alsa-lib', 'at-spi2-core', 'glibc>=2.32', 'gtk3', 'libdrm', 'libnotify', 'libsecret',
-        'libxss', 'libxtst', 'mesa', 'nspr', 'nss', 'util-linux-libs', 'xdg-utils'],
+        'libxss', 'libxtst', 'mesa', 'nspr', 'nss', 'util-linux-libs', 'xdg-utils', 'xdg-user-dirs'],
     },
     nsis: {
       installerSidebar: join(buildPaths.root, 'installer-ui', 'uninstaller-sidebar.bmp'),
