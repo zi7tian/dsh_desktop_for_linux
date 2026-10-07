@@ -17,7 +17,8 @@ describe('installer preparation preserves application dependencies', () => {
   it('accepts the Linux installer settings without signing or update credentials', async () => {
     const config = createElectronBuilderConfig({ DSH_DESKTOP_APP_ID: 'com.example.installer' }, 'linux', 'x64')
     const packager = new Packager({ projectDir: tmpdir() })
-    await expect(validateConfiguration(config as Configuration, packager.debugLogger)).resolves.toBeUndefined()
+    // Schema validation only reads the factory's readonly configuration.
+    await expect(validateConfiguration(config as Configuration & typeof config, packager.debugLogger)).resolves.toBeUndefined()
   })
 
   it.each(['win32', 'darwin'] as const)('rejects a missing production policy before signing on %s', async (platform) => {
