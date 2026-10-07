@@ -8,7 +8,7 @@ import { dirname, join, relative } from 'node:path'
 import { expect, it, onTestFinished } from 'vitest'
 import { prepareDesktopCli } from '../scripts/prepare-cli.ts'
 
-function fixture() {
+function fixture(layout: 'mac' | 'linux' | 'win' = process.platform === 'win32' ? 'win' : 'mac') {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'dsh-cli-launcher-')))
   const children: ChildProcessWithoutNullStreams[] = []
   const exits: Promise<unknown>[] = []
@@ -19,16 +19,23 @@ function fixture() {
     await Promise.allSettled(exits)
     await rm(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
   })
-  const application = join(root, 'Application 中文 with spaces.app')
-  const platform = process.platform === 'win32' ? 'win32' : 'darwin'
-  const resources = join(application, ...platform === 'darwin' ? ['Contents', 'Resources'] : ['resources'])
+  const application = layout === 'mac' ? join(root, 'Application 中文 with spaces.app') : join(root, 'Application 中文 with spaces')
+  const platform = layout === 'win' ? 'win32' : layout === 'mac' ? 'darwin' : 'linux'
+  const resources = layout === 'mac' ? join(application, 'Contents', 'Resources') : join(application, 'resources')
   const cli = join(resources, 'runtime', 'cli')
   prepareDesktopCli(cli, platform)
-  const electron = join(application, ...platform === 'darwin' ? ['Contents', 'MacOS', 'DeepSeek Harness'] : ['DeepSeek Harness.exe'])
+  const electron = layout === 'mac' ? join(application, 'Contents', 'MacOS', 'DeepSeek Harness')
+    : layout === 'win' ? join(application, 'DeepSeek Harness.exe') : join(application, 'deepseek-harness')
   mkdirSync(dirname(electron), { recursive: true })
-  if (platform === 'win32') copyFileSync(process.execPath, electron)
+  if (layout === 'win') copyFileSync(process.execPath, electron)
   else symlinkSync(process.execPath, electron)
-  const entry = join(resources, 'app.asar', 'dsh', 'node_modules', '@deepseek-ai', 'dsh-desktop-host', 'lib', 'cli.js')
+  if (layout === 'linux') {
+    const bundled = join(resources, 'runtime', 'primary-runtime', 'dependencies', 'node', 'bin', 'node')
+    mkdirSync(dirname(bundled), { recursive: true })
+    symlinkSync(process.execPath, bundled)
+  }
+  const entry = join(resources, layout === 'linux' ? 'app' : 'app.asar', 'dsh', 'node_modules',
+    '@deepseek-ai', 'dsh-desktop-host', 'lib', 'cli.js')
   mkdirSync(dirname(entry), { recursive: true })
   writeFileSync(join(dirname(entry), 'package.json'), '{"type":"module"}\n')
   writeFileSync(entry, [
@@ -39,10 +46,10 @@ function fixture() {
     'process.exitCode = 23',
     '',
   ].join('\n'))
-  const command = join(cli, 'bin', platform === 'win32' ? 'dsh.cmd' : 'dsh')
+  const command = join(cli, 'bin', layout === 'win' ? 'dsh.cmd' : 'dsh')
   function start(args: string[], executable = command) {
     // cmd fixture inputs contain no metacharacters; POSIX cases exercise literal expansion characters separately.
-    const child = platform === 'win32'
+    const child = layout === 'win'
       ? spawn(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', `""${executable}" ${args.map(value => `"${value}"`).join(' ')}"`], {
         cwd: root, env: { ...process.env, DSH_CLI_TEST_VALUE: 'kept' }, stdio: 'pipe', windowsVerbatimArguments: true,
       })
@@ -71,6 +78,15 @@ it('preserves common arguments, cwd, environment, binary input, stderr and exit 
   expect(await run.closed, run.stderr()).toBe(23)
   expect(JSON.parse(run.stdout())).toEqual({ args, cwd: f.root, value: 'kept', nodeMode: '1', input: input.toString('hex') })
   expect(run.stderr()).toBe('separate stderr\n')
+})
+
+it.skipIf(process.platform === 'win32')('runs the application unpacked in the Linux layout', async () => {
+  const f = fixture('linux')
+  const args = ['plugin', '--profile', 'desktop', 'migrate', '--from', 'web']
+  const run = f.start(args)
+  run.child.stdin.end()
+  expect(await run.closed, run.stderr()).toBe(23)
+  expect(JSON.parse(run.stdout())).toMatchObject({ args, cwd: f.root, nodeMode: '1' })
 })
 
 it.skipIf(process.platform === 'win32')('resolves chained command symlinks without expanding argument contents', async () => {

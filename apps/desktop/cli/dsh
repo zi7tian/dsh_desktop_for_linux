@@ -11,4 +11,13 @@ while [ -L "$launcher" ]; do
   esac
 done
 resources=$(CDPATH= cd -- "$(dirname -- "$launcher")/../../.." && pwd -P)
-ELECTRON_RUN_AS_NODE=1 exec "$resources/../MacOS/DeepSeek Harness" --expose-internals "$resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js" "$@"
+host=$resources/app.asar/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js
+if [ -f "$host" ]; then
+  executable="$resources/../MacOS/DeepSeek Harness"
+  [ -x "$executable" ] || executable="$resources/../deepseek-harness"
+else
+  # Linux packages the payload without ASAR and runs it under the bundled primary runtime Node.
+  executable="$resources/runtime/primary-runtime/dependencies/node/bin/node"
+  host="$resources/app/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js"
+fi
+ELECTRON_RUN_AS_NODE=1 exec "$executable" --expose-internals "$host" "$@"

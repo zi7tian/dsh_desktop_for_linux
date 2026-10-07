@@ -7,6 +7,7 @@ import { resolveWindowsPackageSettings } from '../scripts/windows-package-settin
 
 const WINDOWS = { platform: 'win32', arch: 'x64' } as const
 const MACOS = { platform: 'darwin', arch: 'arm64' } as const
+const LINUX = { platform: 'linux', arch: 'x64' } as const
 const POLICY = { DSH_DESKTOP_MANDATORY_UPDATE_TEST_ORIGIN: 'https://policy.example.com',
   DSH_DESKTOP_MANDATORY_UPDATE_CONFIG: JSON.stringify({ allowedAuthOrigins: ['https://login.example.com'] }) }
 const RELEASE = { ...POLICY, DSH_DESKTOP_APP_ID: 'com.example.desktop', DOWNLOAD_TEST_ORIGIN: 'https://updates.example.com',
@@ -115,6 +116,26 @@ describe('Desktop local packaging configuration', () => {
       await writeFile(join(directory, '.env.windows'), 'APPLE_APP_SPECIFIC_PASSWORD=secret-sentinel\n')
       expect(() => loadDesktopPackageEnvironment('win32', {}, directory)).toThrow(/unsupported setting APPLE_APP_SPECIFIC_PASSWORD/u)
       expect(() => loadDesktopPackageEnvironment('win32', {}, directory)).not.toThrow(/secret-sentinel/u)
+    })
+  })
+
+  it('requires only the shared identity and registry for Linux and rejects platform-specific fields', async () => {
+    await withDirectory(async (directory) => {
+      expect(() => loadDesktopPackageEnvironment('linux', RELEASE, directory)).toThrow(/copy .*.env.linux.example/u)
+      await writeFile(join(directory, '.env.linux'), 'DSH_DESKTOP_APP_ID=com.example.linux\nDSH_DESKTOP_NPM_REGISTRY=https://registry.npmmirror.com/\n')
+      expect(loadDesktopPackageEnvironment('linux', { DOWNLOAD_TEST_ORIGIN: 'https://stale.example.com' }, directory)).toEqual({
+        DSH_DESKTOP_APP_ID: 'com.example.linux', DSH_DESKTOP_NPM_REGISTRY: 'https://registry.npmmirror.com/',
+      })
+      expect(() => {
+        validateDesktopPackageEnvironment({ DSH_DESKTOP_APP_ID: 'com.example.linux' }, LINUX)
+      }).not.toThrow()
+      expect(() => { validateDesktopPackageEnvironment({}, LINUX) }).toThrow(/DSH_DESKTOP_APP_ID/u)
+      expect(() => { validateDesktopPackageEnvironment({ DSH_DESKTOP_APP_ID: 'invalid' }, LINUX) }).toThrow(/reverse-DNS/u)
+      expect(() => {
+        validateDesktopPackageEnvironment({ DSH_DESKTOP_APP_ID: 'com.example.linux', DSH_DESKTOP_NPM_REGISTRY: 'not-a-url' }, LINUX)
+      }).toThrow(/DSH_DESKTOP_NPM_REGISTRY/u)
+      await writeFile(join(directory, '.env.linux'), 'DSH_DESKTOP_MACOS_SIGNING_IDENTITY=Example (TEAMID1234)\n')
+      expect(() => loadDesktopPackageEnvironment('linux', {}, directory)).toThrow(/unsupported setting DSH_DESKTOP_MACOS_SIGNING_IDENTITY/u)
     })
   })
 

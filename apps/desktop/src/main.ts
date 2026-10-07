@@ -148,9 +148,22 @@ interface RuntimeResources {
   readonly dsh: string
 }
 
+/**
+ * The Node executable that runs dsh and its plugins. Electron's bundled Node matches sharp's prebuilt
+ * libvips on Windows and macOS; on Linux it segfaults, so the packaged primary runtime Node runs the payload.
+ * @returns the absolute path of the Node executable for the Host process.
+ */
+function desktopNode(): string {
+  if (process.platform !== 'linux') return process.execPath
+  const primaryRuntime = app.isPackaged
+    ? join(process.resourcesPath, 'runtime', 'primary-runtime')
+    : developmentPrimaryRuntime()
+  return join(primaryRuntime, 'dependencies', 'node', 'bin', 'node')
+}
+
 function runtimeResources(): RuntimeResources {
   const development = !app.isPackaged
-  const node = process.execPath
+  const node = desktopNode()
   const nodeBin = development ? join(app.getAppPath(), 'scripts', 'node-bin') : join(process.resourcesPath, 'runtime', 'bin')
   const pnpm = (development ? process.env.DSH_DESKTOP_PNPM_ENTRY : undefined)
     ?? (development ? join(app.getAppPath(), 'node_modules', 'pnpm', 'bin', 'pnpm.mjs')
@@ -438,7 +451,8 @@ async function main(): Promise<void> {
     return next.promise
   }
   const platformView = new DesktopPlatformView(join(app.getAppPath(), 'lib', 'preload-platform-account.cjs'),
-    () => locale.id === 'zh-CN' ? 'zh_CN' : 'en_US', process.platform === 'win32' ? 'win32' : 'darwin')
+    () => locale.id === 'zh-CN' ? 'zh_CN' : 'en_US',
+    process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : null)
   const backend = new DesktopBackendController((onFailure) => {
     const hostInspectPort = developmentHostInspectPort(development)
     const host = new DesktopHostProcess(resources.node, resources.dsh, activeProject,

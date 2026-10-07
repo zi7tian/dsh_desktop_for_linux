@@ -36,6 +36,10 @@
     },
     "./src/*": "./src/*",
     "./package.json": "./package.json",
+    "./migrate": {
+      "types": "./lib/types/migrate.d.ts",
+      "default": "./lib/types/migrate.js"
+    },
     "./operations": {
       "types": "./lib/types/operations.d.ts",
       "default": "./lib/types/operations.js"

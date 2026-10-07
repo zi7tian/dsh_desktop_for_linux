@@ -106,7 +106,7 @@ Windows 应用替换遵循[目录安装决策](2026-09-11-windows-directory-inst
 | 包状态 | Electron RunAsNode 执行不可变核心资源；内置 pnpm 只修改 Desktop profile 中的外部插件依赖图。 |
 | 资格验证 | macOS 打包要求已配置的公司身份与公证凭据可用，在生成清单前验证每个原生运行时文件，验证完整应用签名，并要求应用和 DMG 都完成公证且通过 Gatekeeper。Windows 打包要求已配置的公开证书、SafeNet 私钥容器、Token Password 与 SignTool，并验证生成的每个签名。更新托管、跨上一版本的已安装产物测试和各平台 GUI 录制仍是发布环境门槛。 |
 
-`dev:desktop` 会构建当前 workspace，把已构建 CLI 包、私有 Desktop Host 包及其依赖链接投影为一次性项目，使用隔离的 Harness home，打开 Main、Renderer 和 Host 调试器，并在不准备发布资源的情况下启动未打包 Electron。开发运行时为独立的插件 profile 提供工作区链接；插件管理和恢复使用与打包应用相同的流程。固定的 macOS arm64、macOS x64 与 Windows x64 打包命令会把同一目标传给运行时准备、dsh 准备和 electron-builder；每条命令还提供未封装安装器的变体，用于在生成安装器前验证发布路径。
+`dev:desktop` 会构建当前 workspace，把已构建 CLI 包、私有 Desktop Host 包及其依赖链接投影为一次性项目，使用隔离的 Harness home，打开 Main、Renderer 和 Host 调试器，并在不准备发布资源的情况下启动未打包 Electron。开发运行时为独立的插件 profile 提供工作区链接；插件管理和恢复使用与打包应用相同的流程。固定的 macOS arm64、macOS x64、Windows x64 与 Linux x64 打包命令会把同一目标传给运行时准备、dsh 准备和 electron-builder；每条命令还提供未封装安装器的变体，用于在生成安装器前验证发布路径。Linux 从无归档的载荷构建未签名 AppImage，详见[为 Linux 打包桌面应用](2026-10-02-linux-desktop-release-target.zh.md)。
 
 ## 考虑过的替代方案
 
@@ -157,7 +157,7 @@ Windows 应用替换遵循[目录安装决策](2026-09-11-windows-directory-inst
 | 桌面 profile | 一个由 Electron 拥有的保留 profile，保存外部插件和共享包链接 |
 | 插件管理 | 共享 Web“插件”页面与 Host 服务，使用启动器提供的内置 pnpm |
 | 激活 | 启用 HMR 时由共享管理器应用配置；否则变更需要重启 |
-| 初始平台 | macOS arm64/x64 与 Windows x64；Linux 尚无受支持的发布目标 |
+| 发布目标 | macOS arm64/x64、Windows x64 与 Linux x64；Linux 提供未签名且不含更新 feed 的 AppImage（[Linux 桌面发布目标](2026-10-02-linux-desktop-release-target.zh.md)） |
 | 更新行为 | 后台检查，差分下载与重启前显式确认，启动时校准 dsh |
 
 ## 风险

@@ -79,4 +79,13 @@ describe('desktop build version discovery', () => {
     await expect(suggestDesktopBuildVersion({ productVersion: PRERELEASE, target: 'win-x64', environment: {}, date: DATE, artifactsRoot }))
       .resolves.toBe(`${PRERELEASE}.${DATE}.3`)
   })
+
+  it.each(['amd64.deb', 'x86_64.rpm', 'x86_64.pkg.tar.zst'])('counts Linux %s installers without counting checksums', async (suffix) => {
+    const artifactsRoot = await artifactsWith([
+      `deepseek-harness-${PRERELEASE}.${DATE}.4-linux-${suffix}`,
+      `deepseek-harness-${PRERELEASE}.${DATE}.9-linux-${suffix}.sha256`,
+    ])
+    await expect(suggestDesktopBuildVersion({ productVersion: PRERELEASE, target: 'linux-x64', environment: {}, date: DATE, artifactsRoot }))
+      .resolves.toBe(`${PRERELEASE}.${DATE}.5`)
+  })
 })

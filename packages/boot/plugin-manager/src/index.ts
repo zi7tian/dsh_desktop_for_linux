@@ -35,6 +35,10 @@ import type {
 export type * from './types.ts'
 export { classifyInstallFailure, type InstallFailureFacts } from './install-failure.ts'
 export { InvalidInstallSpecError, parseInstallSpec, type ParsedInstallSpec } from './install-spec.ts'
+export {
+  planProfilePluginMigration, type ProfileMigrationInstall, type ProfileMigrationOptions, type ProfileMigrationPlan,
+  type ProfileMigrationSkip,
+} from './migrate.ts'
 
 /** The pnpm executable, registries, and limits for diagnostics, lookups and connection checks. */
 export interface Config {

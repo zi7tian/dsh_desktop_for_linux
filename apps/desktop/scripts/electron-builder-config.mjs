@@ -50,11 +50,14 @@ export function createElectronBuilderConfig(
   preparedRuntime = undefined,
   preparedRuntimeVersion = undefined,
 ) {
-  const appId = resolveDesktopAppId(env)
-  const policy = resolveDesktopPolicyEnvironment(env)
   const targetPlatform = env.DSH_DESKTOP_TARGET_PLATFORM
   const resolvedPlatform = targetPlatform ?? hostPlatform
   const resolvedArch = env.DSH_DESKTOP_TARGET_ARCH ?? hostArch
+  const appId = resolveDesktopAppId(env)
+  // Linux packages are built locally against no published feed, so there is no update origin or
+  // mandatory-update policy service to embed. Both metadata fields stay absent on that platform.
+  const linux = resolvedPlatform === 'linux'
+  const policy = linux ? undefined : resolveDesktopPolicyEnvironment(env)
   if (env.DSH_DESKTOP_UNSIGNED !== undefined && !['0', '1'].includes(env.DSH_DESKTOP_UNSIGNED)) {
     throw new Error('desktop package: DSH_DESKTOP_UNSIGNED must be 0 or 1')
   }
@@ -90,7 +93,7 @@ export function createElectronBuilderConfig(
   if (windowsSigner !== undefined) {
     installWindowsNsisBootstrapSigner({ sign: windowsSigner })
   }
-  const update = unsigned ? undefined : resolveDesktopAutoUpdateConfig(env, resolvedPlatform, resolvedArch)
+  const update = unsigned || linux ? undefined : resolveDesktopAutoUpdateConfig(env, resolvedPlatform, resolvedArch)
   if (preparedRuntime !== undefined) buildPaths.dsh = preparedRuntime
   // electron-builder merges extraMetadata into the packaged manifest, so a build version here reaches
   // the artifact names, the update feed, and the installed app.getVersion() the updater compares against.
@@ -102,7 +105,7 @@ export function createElectronBuilderConfig(
     protocols: [{ name: 'DeepSeek Harness', schemes: ['dsh'] }],
     extraMetadata: {
       dshDesktopAppId: appId,
-      dshMandatoryUpdatePolicy: policy,
+      ...policy === undefined ? {} : { dshMandatoryUpdatePolicy: policy },
       ...buildVersion === productVersion ? {} : { version: buildVersion },
       ...packaged === undefined ? {} : { dshBuildCommit: packaged.commit, dshBuildDirty: packaged.dirty },
     },
@@ -110,7 +113,8 @@ export function createElectronBuilderConfig(
     // Unsigned builds carry their own suffix so a shared file can never pass for a release artifact.
     artifactName: `deepseek-harness-\${version}-\${os}-\${arch}${unsigned ? '-unsigned' : ''}.\${ext}`,
     directories: { output: unsigned ? buildPaths.unsignedArtifacts : buildPaths.artifacts },
-    asar: true,
+    // Linux runs the payload under the bundled Node, which cannot read ASAR archives.
+    asar: resolvedPlatform !== 'linux',
     electronDist: buildPaths.electron,
     electronFuses: { runAsNode: true },
     beforeBuild: async () => {
@@ -231,8 +235,31 @@ export function createElectronBuilderConfig(
       target: ['nsis'],
     },
     linux: {
+      // A single 512x512-or-larger PNG is what electron-builder derives the hicolor icon set from.
+      icon: fileURLToPath(new URL('../resources/icon.png', import.meta.url)),
+      executableName: 'deepseek-harness',
+      packageName: 'deepseek-harness',
+      maintainer: 'zi7tian <147575071+zi7tian@users.noreply.github.com>',
       category: 'Development',
-      target: ['AppImage'],
+      target: [
+        { target: 'deb', arch: ['x64'] },
+        { target: 'rpm', arch: ['x64'] },
+        { target: 'pacman', arch: ['x64'] },
+      ],
+    },
+    deb: {
+      depends: ['libc6 (>= 2.32)', 'libgtk-3-0', 'libnotify4', 'libnss3', 'libxss1', 'libxtst6', 'xdg-utils',
+        'libatspi2.0-0', 'libuuid1', 'libsecret-1-0', 'libasound2', 'libgbm1', 'libdrm2'],
+    },
+    rpm: {
+      depends: ['glibc >= 2.32', 'gtk3', 'libnotify', 'nss', 'libXScrnSaver', 'libXtst', 'xdg-utils',
+        'at-spi2-core', 'libuuid', 'libsecret', 'alsa-lib', 'mesa-libgbm', 'libdrm'],
+    },
+    pacman: {
+      artifactName: 'deepseek-harness-${version}-linux-x86_64.pkg.tar.zst',
+      compression: 'zstd',
+      depends: ['alsa-lib', 'at-spi2-core', 'glibc>=2.32', 'gtk3', 'libdrm', 'libnotify', 'libsecret',
+        'libxss', 'libxtst', 'mesa', 'nspr', 'nss', 'util-linux-libs', 'xdg-utils'],
     },
     nsis: {
       installerSidebar: join(buildPaths.root, 'installer-ui', 'uninstaller-sidebar.bmp'),

@@ -1,0 +1,19 @@
+# Bilingual-pair consistency record for 2026-10-02-profile-plugin-migration.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-10-02-profile-plugin-migration.md
+/agent-note-migrate-plugins-between-the-web-and-desktop-profiles:
+  en: 3106b65779134aae
+  zh: b3ebda99f21d794b
+/agent-note-migrate-plugins-between-the-web-and-desktop-profiles/problem:
+  en: 8b8a869678b65aa7
+  zh: 1fd063d7beb73abd
+/agent-note-migrate-plugins-between-the-web-and-desktop-profiles/decision:
+  en: c0d7e4dec7cfeabb
+  zh: 367348043e5ed117
+/agent-note-migrate-plugins-between-the-web-and-desktop-profiles/alternatives-considered:
+  en: eb4defd9205e097d
+  zh: 18fb06ff040def44
+/agent-note-migrate-plugins-between-the-web-and-desktop-profiles/consequences:
+  en: c891daac9b886886
+  zh: c15d4a90f815fb08
