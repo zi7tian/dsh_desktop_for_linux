@@ -238,7 +238,7 @@ export function createElectronBuilderConfig(
       // A single 512x512-or-larger PNG is what electron-builder derives the hicolor icon set from.
       icon: fileURLToPath(new URL('../resources/icon.png', import.meta.url)),
       executableName: 'deepseek-harness',
-      packageName: 'deepseek-harness',
+      syncDesktopName: true,
       maintainer: 'zi7tian <147575071+zi7tian@users.noreply.github.com>',
       category: 'Development',
       target: [
@@ -248,14 +248,17 @@ export function createElectronBuilderConfig(
       ],
     },
     deb: {
+      packageName: 'deepseek-harness',
       depends: ['libc6 (>= 2.32)', 'libgtk-3-0', 'libnotify4', 'libnss3', 'libxss1', 'libxtst6', 'xdg-utils',
         'libatspi2.0-0', 'libuuid1', 'libsecret-1-0', 'libasound2', 'libgbm1', 'libdrm2'],
     },
     rpm: {
+      packageName: 'deepseek-harness',
       depends: ['glibc >= 2.32', 'gtk3', 'libnotify', 'nss', 'libXScrnSaver', 'libXtst', 'xdg-utils',
         'at-spi2-core', 'libuuid', 'libsecret', 'alsa-lib', 'mesa-libgbm', 'libdrm'],
     },
     pacman: {
+      packageName: 'deepseek-harness',
       artifactName: 'deepseek-harness-${version}-linux-x86_64.pkg.tar.zst',
       compression: 'zstd',
       depends: ['alsa-lib', 'at-spi2-core', 'glibc>=2.32', 'gtk3', 'libdrm', 'libnotify', 'libsecret',

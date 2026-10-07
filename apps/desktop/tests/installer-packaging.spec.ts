@@ -1,8 +1,10 @@
 import { tmpdir } from 'node:os'
 import { readFileSync } from 'node:fs'
 import { Arch, Platform } from 'electron-builder'
-import { Packager } from 'app-builder-lib'
+import { Packager, type Configuration } from 'app-builder-lib'
+import { validateConfiguration } from 'app-builder-lib/out/util/config/config.js'
 import { describe, expect, it, vi } from 'vitest'
+import { createElectronBuilderConfig } from '../scripts/electron-builder-config.mjs'
 
 const { execute } = vi.hoisted(() => ({ execute: vi.fn(async () => undefined) }))
 vi.mock('node:child_process', async (importOriginal) => {
@@ -12,6 +14,12 @@ vi.mock('node:child_process', async (importOriginal) => {
 })
 
 describe('installer preparation preserves application dependencies', () => {
+  it('accepts the Linux installer settings without signing or update credentials', async () => {
+    const config = createElectronBuilderConfig({ DSH_DESKTOP_APP_ID: 'com.example.installer' }, 'linux', 'x64')
+    const packager = new Packager({ projectDir: tmpdir() })
+    await expect(validateConfiguration(config as Configuration, packager.debugLogger)).resolves.toBeUndefined()
+  })
+
   it.each(['win32', 'darwin'] as const)('rejects a missing production policy before signing on %s', async (platform) => {
     const { createElectronBuilderConfig } = await import('../scripts/electron-builder-config.mjs')
     expect(() => createElectronBuilderConfig({ DSH_DESKTOP_APP_ID: 'com.example.installer',
