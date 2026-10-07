@@ -409,7 +409,7 @@ The Linux x64 target packages the same application, runtime, and Web profile as 
 - Desktop reports the Web client identity to the account service, and installing the terminal `dsh` command into the shell is unsupported.
 - Building the installers requires a Linux x86_64 host with `rpmbuild`, `tar`, `xz`, and `zstd` on `PATH`. The packages include desktop menu entries, icons, and the `dsh://` handler; no FUSE runtime is required.
 
-`pnpm run package:desktop:linux:x64` writes unsigned `.deb`, `.rpm`, and `.pkg.tar.zst` installers under `.desktop-build/targets/linux-x64/artifacts/`, all for x86_64. The Arch package uses zstd compression. The bundled native libraries require glibc 2.32 or newer. `pnpm run package:desktop:linux:x64:dir` stops at the unpacked application directory. Neither command uploads or tags the commit; Linux updates are distributed as replacement installers.
+`pnpm run package:desktop:linux:x64` writes unsigned `.deb`, `.rpm`, and `.pkg.tar.zst` installers under `.desktop-build/targets/linux-x64/artifacts/`, all for x86_64. The RPM uses the v4 package format; the Arch package uses zstd compression. The bundled native libraries require glibc 2.32 or newer. `pnpm run package:desktop:linux:x64:dir` stops at the unpacked application directory. Neither command uploads or tags the commit; Linux updates are distributed as replacement installers.
 
 ## Updates
 

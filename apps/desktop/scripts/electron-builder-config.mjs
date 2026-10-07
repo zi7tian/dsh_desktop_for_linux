@@ -254,11 +254,13 @@ export function createElectronBuilderConfig(
     },
     rpm: {
       packageName: 'deepseek-harness',
+      fpm: ['--rpm-rpmbuild-define', '_rpmformat 4', '--rpm-compression-level', '6'],
       depends: ['glibc >= 2.32', 'gtk3', 'libnotify', 'nss', 'libXScrnSaver', 'libXtst', 'xdg-utils', 'xdg-user-dirs',
         'at-spi2-core', 'libuuid', 'libsecret', 'alsa-lib', 'mesa-libgbm', 'libdrm'],
     },
     pacman: {
       packageName: 'deepseek-harness',
+      fpm: ['--description', 'DeepSeek Harness desktop'],
       artifactName: 'deepseek-harness-${version}-linux-x86_64.pkg.tar.zst',
       compression: 'zstd',
       depends: ['alsa-lib', 'at-spi2-core', 'glibc>=2.32', 'gtk3', 'libdrm', 'libnotify', 'libsecret',

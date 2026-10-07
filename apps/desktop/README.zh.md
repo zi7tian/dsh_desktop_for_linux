@@ -411,7 +411,7 @@ Linux x64 目标打包与其他目标相同的应用、运行时和 Web profile�
 - Desktop 向账号服务报告 Web 客户端身份，且不支持把终端 `dsh` 命令安装到 shell。
 - 构建安装包需要 Linux x86_64 主机，且 `PATH` 中提供 `rpmbuild`、`tar`、`xz` 和 `zstd`。安装包包含桌面菜单入口、图标和 `dsh://` 协议处理器；不需要 FUSE 运行时。
 
-`pnpm run package:desktop:linux:x64` 在 `.desktop-build/targets/linux-x64/artifacts/` 中生成未签名的 `.deb`、`.rpm` 和 `.pkg.tar.zst` 安装包，全部为 x86_64。Arch 包采用 zstd 压缩。内置原生库要求 glibc 2.32 或更新版本。`pnpm run package:desktop:linux:x64:dir` 停在未打包的应用目录。两条命令都不上传或为提交打标签；Linux 更新通过新版本安装包分发。
+`pnpm run package:desktop:linux:x64` 在 `.desktop-build/targets/linux-x64/artifacts/` 中生成未签名的 `.deb`、`.rpm` 和 `.pkg.tar.zst` 安装包，全部为 x86_64。RPM 采用 v4 包格式；Arch 包采用 zstd 压缩。内置原生库要求 glibc 2.32 或更新版本。`pnpm run package:desktop:linux:x64:dir` 停在未打包的应用目录。两条命令都不上传或为提交打标签；Linux 更新通过新版本安装包分发。
 
 ## 更新
 
