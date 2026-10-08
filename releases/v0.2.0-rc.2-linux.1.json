@@ -1,0 +1,32 @@
+{
+  "tag": "v0.2.0-rc.2-linux.1",
+  "upstream": {
+    "repository": "https://github.com/deepseek-ai/deepseek-harness.git",
+    "commit": "639ed015397290b3745d163aafe02ffee4aa3f84",
+    "version": "0.2.0-rc.2",
+    "patch_sha256": "b3d740664c444af3f277b83b9ccc60e558e2fc7b230418935d7510b743eee3ea",
+    "patched_tree": "3bfadd243324d76f8c62a8016865135cc4788201"
+  },
+  "assets": [
+    {
+      "name": "deepseek-harness-0.2.0-rc.2-linux-amd64.deb",
+      "size": 305540356,
+      "digest": "sha256:69e409aa07e4313d25cd33d95133127cd1db35f376e40881a587213590a93f54"
+    },
+    {
+      "name": "deepseek-harness-0.2.0-rc.2-linux-x86_64.pkg.tar.zst",
+      "size": 370384713,
+      "digest": "sha256:351650778a588ba37ded04f41f8eac439e3276035451fd19bed2d99d1718f484"
+    },
+    {
+      "name": "deepseek-harness-0.2.0-rc.2-linux-x86_64.rpm",
+      "size": 277482361,
+      "digest": "sha256:fa3f7dec4aeb116f53836f6da09b806bdf07229edc13a6117e0e241e9b256d5b"
+    },
+    {
+      "name": "SHA256SUMS",
+      "size": 340,
+      "digest": "sha256:fed5514d0fb83300f67e29d62d5e3d47204645945a7c453beca555aa27016cf1"
+    }
+  ]
+}

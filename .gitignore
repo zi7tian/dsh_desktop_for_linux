@@ -1,0 +1,5 @@
+.work/
+dist/
+.env.linux
+__pycache__/
+*.pyc
